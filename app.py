@@ -2,7 +2,7 @@ import os
 import pickle
 import tempfile
 import shutil
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 from googleapiclient.http import MediaFileUpload
@@ -12,8 +12,8 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = tempfile.mkdtemp()
 app.secret_key = os.urandom(24)
 
-# Google Drive setup - REPLACE WITH YOUR FOLDER ID
-FOLDER_ID = '1j83pj6sIL2mfNiWFqOYbb21vvNvlTwqd'
+# Google Drive Configuration
+FOLDER_ID = '1j83pj6sIL2mfNiWFqOYbb21vvNvlTwqd'  # REPLACE WITH YOUR FOLDER ID
 
 def get_drive_service():
     """Authenticate using existing token.pickle"""
@@ -30,9 +30,13 @@ def get_drive_service():
     
     return build('drive', 'v3', credentials=creds)
 
-@app.route('/', methods=['GET'])
-def index():
-    return render_template('index.html')
+@app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/upload', methods=['GET'])
+def upload_form():
+    return render_template('upload.html')
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -48,13 +52,11 @@ def upload_file():
         return redirect(request.url)
     
     try:
-        # Create temp directory
         temp_dir = tempfile.mkdtemp()
         filename = secure_filename(file.filename)
         file_path = os.path.join(temp_dir, filename)
         file.save(file_path)
         
-        # Upload to Google Drive
         service = get_drive_service()
         file_metadata = {
             'name': filename,
@@ -67,18 +69,21 @@ def upload_file():
             fields='id'
         ).execute()
         
-        # Add metadata to file description
         description = f"Color: {color_mode}\nPages: {pages}\nInstructions: {instructions}"
         service.files().update(
             fileId=drive_file['id'],
             body={'description': description}
         ).execute()
         
-        return 'File uploaded successfully!'
+        return redirect(url_for('confirmation'))
     except Exception as e:
         return f'Error: {str(e)}'
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
+
+@app.route('/confirmation')
+def confirmation():
+    return render_template('confirmation.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
