@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Thank You - Digital Print Hub{% endblock %}
+
+{% block content %}
+<section class="confirmation">
+    <div class="confirmation-card">
+        <div class="checkmark">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h2>Print Request Received!</h2>
+        <p>We've received your files and will process them shortly.</p>
+        <div class="confirmation-details">
+            <p><i class="fas fa-clock"></i> Estimated Ready Time: 2-4 hours</p>
+            <p><i class="fas fa-map-marker-alt"></i> Pickup Location: 123 Print Street</p>
+        </div>
+        <a href="{{ url_for('home') }}" class="cta-button">
+            <i class="fas fa-home"></i> Return to Home
+        </a>
+    </div>
+</section>
+{% endblock %}
