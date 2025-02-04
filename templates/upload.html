@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Files - Digital Print Hub{% endblock %}
+
+{% block content %}
+<section class="upload-section">
+    <div class="upload-container">
+        <h2><i class="fas fa-cloud-upload-alt"></i> Upload Your Files</h2>
+        <form id="uploadForm" enctype="multipart/form-data" method="POST" action="{{ url_for('upload_file') }}">
+            <div class="form-group">
+                <label for="file" class="file-upload-label">
+                    <i class="fas fa-file-upload"></i>
+                    <span id="file-name">Choose File (PDF, JPG, PNG)</span>
+                </label>
+                <input type="file" name="file" id="file" required accept=".pdf,.jpg,.jpeg,.png" hidden>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Print Options</label>
+                <div class="option-grid">
+                    <div class="option-card">
+                        <h4><i class="fas fa-palette"></i> Color Mode</h4>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="color" value="color" required>
+                                <span class="radio-checkmark"></span>
+                                Color Printing
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="color" value="bw" checked>
+                                <span class="radio-checkmark"></span>
+                                Black & White
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="option-card">
+                        <h4><i class="fas fa-file-alt"></i> Page Selection</h4>
+                        <input type="text" name="pages" id="pages" 
+                               placeholder="Example: 1-5, 8, 10-12"
+                               class="form-input">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="instructions">Special Instructions:</label>
+                <textarea name="instructions" id="instructions" rows="3"></textarea>
+            </div>
+
+            <div class="preview-container">
+                <h3><i class="fas fa-eye"></i> File Preview</h3>
+                <div id="preview"></div>
+            </div>
+
+            <button type="submit" class="submit-button">
+                <i class="fas fa-paper-plane"></i> Submit Print Request
+            </button>
+        </form>
+    </div>
+</section>
+
+<script>
+document.getElementById('file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const preview = document.getElementById('preview');
+    const fileName = document.getElementById('file-name');
+    
+    if (file) {
+        fileName.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if (file.type === 'application/pdf') {
+                preview.innerHTML = `
+                    <embed src="${e.target.result}" 
+                           type="application/pdf" 
+                           width="100%" 
+                           height="500px" />`;
+            } else if (file.type.startsWith('image/')) {
+                preview.innerHTML = `
+                    <img src="${e.target.result}" 
+                         style="max-width: 100%; 
+                                max-height: 500px; 
+                                object-fit: contain;">`;
+            } else {
+                preview.innerHTML = 'Preview not available';
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{% endblock %}
